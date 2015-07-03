@@ -1,0 +1,13 @@
+{
+  "name": "fluxus",
+  "version": "1.0.0",
+  "description": "Watches for changes in files and applies actions on each change.",
+  "main": "lib/index.js",
+  "bin": "bin/fluxus",
+  "author": "Diego Fernandez <diegof79@gmail.com> (https://github.com/dfernandez79)",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^1.1.0",
+    "fs-extra": "^0.20.1"
+  }
+}
