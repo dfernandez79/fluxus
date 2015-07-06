@@ -12,7 +12,7 @@ Illustrator files to InVision. InVision can read Sketch files and generate scree
 supported for Illustrator.
 
 I tried with different approaches: MacOSX folder actions were a painful experience, and doesn't detect file changes
-very well. An Illustrator plugin wiil resolve my need. But it requires lots of work, and I can resolve my need using other
+very well. An Illustrator plugin will resolve my need. But it requires lots of work, and I can resolve my need using other
 tools (like a MacOSX Workflow to extract images from PDF).
 
 So I end using NodeJS. It's easy for me to code in it, resolves my problem, and it can be extended to execute other actions.
