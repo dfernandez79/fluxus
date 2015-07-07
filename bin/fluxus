@@ -3,59 +3,45 @@
 var fs = require('fs-extra');
 var chalk = require('chalk');
 var path = require('path');
-var actionClasses = require('../lib').actionClasses;
-var configPath = process.argv[2] || 'config.json';
-var config;
+var fluxus = require('../lib');
+var configPath = path.resolve(process.argv[2] || 'config.json');
+var config = loadConfig(configPath);
 
-console.log(chalk.dim('Using configuration from ' + path.resolve(configPath)));
-config = fs.readJsonSync(path.resolve(configPath));
+var eventHandlers = {
+  watch: function (evt) {
+    console.log(
+      chalk.cyan('Watching: ') +
+      chalk.bold(evt.action.fileToWatch()) +
+      chalk.dim(' (' + evt.action.friendlyName() + ')')
+    );
+  },
+  change: function (evt) {
+    console.log(chalk.green('Change detected: ') + chalk.bold(evt.action.fileToWatch()));
+  },
+  start: function (evt) {
+    console.log(chalk.yellow('Start: ') + chalk.bold(evt.action));
+  },
+  end: function (evt) {
+    console.log(chalk.yellow('End: ') + chalk.bold(evt.action));
+  },
+  error: function (evt) {
+    console.log( chalk.bold.red('ERROR ') + chalk.bold(evt.action));
+    console.log(chalk.dim('Cause: \n' + evt.cause));
+  },
+  progress: function (evt) {
+    console.log(chalk.dim('  ' + evt.status));
+  }
+};
 
-function onActionStart(evt) {
-  console.log(
-    chalk.yellow('Start: ') +
-    chalk.bold(evt.action));
-}
-
-function onActionEnd(evt) {
-  console.log(
-    chalk.yellow('End: ') +
-    chalk.bold(evt.action));
-}
-
-function onActionError(evt) {
-  console.log(
-    chalk.bold.red('ERROR ') +
-    chalk.bold(evt.action));
-
-  console.log(chalk.dim('Cause: \n' + evt.cause));
-}
-
-function onActionProgress(evt) {
-  console.log(chalk.dim('  ' + evt.status));
-}
-
-config.forEach(function (cfg) {
-  actionClasses
-    .filter(function (Action) { return Action.appliesTo(cfg); })
-    .map(function (Action) { return new Action(cfg); })
-    .forEach(function (action) {
-      action
-        .on('start', onActionStart)
-        .on('progress', onActionProgress)
-        .on('error', onActionError)
-        .on('end', onActionEnd);
-
-      console.log(
-        chalk.cyan('Watching: ') +
-        chalk.bold(action.fileToWatch()) +
-        chalk.dim(' (' + action.friendlyName() + ')')
-      );
-
-      fs.watchFile(action.fileToWatch(), function (curr, prev) {
-        if (curr.mtime > prev.mtime) {
-          console.log(chalk.green('Change detected: ') + chalk.bold(action.fileToWatch()));
-          action.run();
-        }
-      });
-    });
+var fluxusRun = fluxus(config, eventHandlers);
+fs.watch(configPath, function () {
+  console.log(chalk.green('Change detected: ') + chalk.bold('Configuration file'));
+  config = fs.readJsonSync(path.resolve(configPath));
+  fluxusRun.stop();
+  fluxusRun = fluxus(config, eventHandlers);
 });
+
+function loadConfig(configPath) {
+  console.log(chalk.dim('Loading configuration ' + path.resolve(configPath)));
+  return fs.readJsonSync(configPath);
+}
