@@ -1,3 +1,5 @@
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
 rm -rf ../Fluxus.app
 mkdir -p ../Fluxus.app/Contents/Resources/app/bin
 mkdir -p ../Fluxus.app/Contents/Resources/app/lib

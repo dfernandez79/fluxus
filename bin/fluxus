@@ -36,12 +36,18 @@ var eventHandlers = {
 var fluxusRun = fluxus(config, eventHandlers);
 fs.watch(configPath, function () {
   console.log(chalk.green('Change detected: ') + chalk.bold('Configuration file'));
-  config = fs.readJsonSync(path.resolve(configPath));
   fluxusRun.stop();
+  config = loadConfig(configPath);
   fluxusRun = fluxus(config, eventHandlers);
 });
 
 function loadConfig(configPath) {
   console.log(chalk.dim('Loading configuration ' + path.resolve(configPath)));
-  return fs.readJsonSync(configPath);
+  try {
+    return fs.readJsonSync(configPath);
+  } catch (e) {
+    console.log(chalk.red('The configuration is not a valid JSON file'));
+    console.log(chalk.dim(e));
+    return [];
+  }
 }
